@@ -1,0 +1,7 @@
+{
+  "name": "BotanistAI",
+  "description": "Snap a photo of your plants to instantly diagnose health issues and get expert care tips.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
