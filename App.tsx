@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Header from './components/Header';
 import ImageUploader from './components/ImageUploader';
 import AnalysisResult from './components/AnalysisResult';
-import { analyzePlant } from './services/geminiService';
+import { analyzePlant, isDemoMode } from './services/plantAnalysisService';
 import { PlantAnalysis, HistoryItem } from './types';
 import { History, ArrowRight } from 'lucide-react';
 
@@ -72,7 +72,14 @@ const App: React.FC = () => {
       <Header />
 
       <main className="container mx-auto px-4 mt-8 flex flex-col items-center">
-        
+
+        {/* Demo Mode Banner */}
+        {isDemoMode() && (
+          <div className="w-full max-w-2xl mb-4 bg-amber-50 border border-amber-200 text-amber-800 px-4 py-2 rounded-lg text-sm text-center">
+            <span className="font-medium">Demo Mode</span> — Using sample data. Set <code className="bg-amber-100 px-1 rounded">AI_PROVIDER</code> and <code className="bg-amber-100 px-1 rounded">AI_API_KEY</code> in <code className="bg-amber-100 px-1 rounded">.env.local</code> for real AI analysis.
+          </div>
+        )}
+
         {/* Error Notification */}
         {error && (
           <div className="w-full max-w-md bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 flex items-center justify-between animate-pulse">
@@ -142,7 +149,7 @@ const App: React.FC = () => {
       </main>
 
       <footer className="mt-20 py-8 text-center text-gray-400 text-sm">
-        <p>&copy; {new Date().getFullYear()} BotanistAI. Powered by Gemini 2.5 Flash.</p>
+        <p>&copy; {new Date().getFullYear()} BotanistAI. AI-Powered Plant Analysis.</p>
       </footer>
     </div>
   );
