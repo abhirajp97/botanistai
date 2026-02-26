@@ -1,20 +1,53 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# BotanistAI 🌿
 
-# Run and deploy your AI Studio app
+AI-powered plant health diagnosis. Upload a photo of your plant to identify it, diagnose health issues, and get expert care instructions.
 
-This contains everything you need to run your app locally.
+**No account or API key required to try it out** — the app runs in demo mode by default.
 
-View your app in AI Studio: https://ai.studio/apps/drive/1RTuafkeAtO2l0Dl0z5LJuqjK8DbQB89K
+---
 
-## Run Locally
+## Quick Start
 
-**Prerequisites:**  Node.js
+**Prerequisites:** Node.js v18+
 
+```bash
+npm install
+npm run dev
+```
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+Open [http://localhost:3000](http://localhost:3000) — the app loads instantly in **Demo Mode**, returning sample plant analyses so you can explore the full UI right away.
+
+---
+
+## Enable Real AI Analysis (Optional)
+
+To use a real LLM for analysis, create a `.env.local` file in the project root:
+
+```bash
+AI_PROVIDER=openai        # openai | google | anthropic
+AI_API_KEY=your-key-here  # API key for the chosen provider
+AI_MODEL=gpt-4o           # optional — sensible defaults are used if omitted
+```
+
+Then restart the dev server (`npm run dev`). The Demo Mode banner will disappear and all plant analyses will use your chosen model.
+
+### Provider Setup
+
+| Provider | `AI_PROVIDER` | Get an API Key | Default Model |
+|---|---|---|---|
+| OpenAI | `openai` | [platform.openai.com](https://platform.openai.com/api-keys) | `gpt-4o` |
+| Google Gemini | `google` | [aistudio.google.com](https://aistudio.google.com/apikey) | `gemini-2.5-flash` |
+| Anthropic Claude | `anthropic` | [console.anthropic.com](https://console.anthropic.com/settings/keys) | `claude-sonnet-4-20250514` |
+
+You can override the model by setting `AI_MODEL` to any vision-capable model your provider supports.
+
+---
+
+## Tech Stack
+
+- React 19 + TypeScript
+- Vite
+- [Vercel AI SDK](https://ai-sdk.dev) — unified interface for OpenAI, Google, and Anthropic
+- Tailwind CSS
+- Recharts (health score visualization)
+- Lucide React (icons)
