@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import Header from './components/Header';
 import ImageUploader from './components/ImageUploader';
 import AnalysisResult from './components/AnalysisResult';
-import { analyzePlant, isDemoMode } from './services/plantAnalysisService';
 import { PlantAnalysis, HistoryItem } from './types';
+import { Provider } from './components/ModelSelector';
 import { History, ArrowRight } from 'lucide-react';
 
 const App: React.FC = () => {
@@ -12,6 +12,8 @@ const App: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [history, setHistory] = useState<HistoryItem[]>([]);
+  const [provider, setProvider] = useState<Provider>('groq');
+  const [apiKey, setApiKey] = useState('');
 
   // Load history from local storage on mount
   useEffect(() => {
@@ -32,9 +34,24 @@ const App: React.FC = () => {
     setAnalysis(null);
 
     try {
-      const result = await analyzePlant(base64Image);
+      const response = await fetch('/api/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          image: base64Image,
+          provider,
+          apiKey: apiKey || undefined,
+        }),
+      });
+
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.error || `Server error: ${response.status}`);
+      }
+
+      const result = await response.json() as PlantAnalysis;
       setAnalysis(result);
-      
+
       // Save to history
       const newHistoryItem: HistoryItem = {
         ...result,
@@ -42,7 +59,7 @@ const App: React.FC = () => {
         timestamp: Date.now(),
         imageUrl: base64Image
       };
-      
+
       const updatedHistory = [newHistoryItem, ...history].slice(0, 10); // Keep last 10
       setHistory(updatedHistory);
       localStorage.setItem('plant_history', JSON.stringify(updatedHistory));
@@ -69,16 +86,14 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#f0fdf4] text-gray-800 pb-20">
-      <Header />
+      <Header
+        provider={provider}
+        apiKey={apiKey}
+        onProviderChange={setProvider}
+        onApiKeyChange={setApiKey}
+      />
 
       <main className="container mx-auto px-4 mt-8 flex flex-col items-center">
-
-        {/* Demo Mode Banner */}
-        {isDemoMode() && (
-          <div className="w-full max-w-2xl mb-4 bg-amber-50 border border-amber-200 text-amber-800 px-4 py-2 rounded-lg text-sm text-center">
-            <span className="font-medium">Demo Mode</span> — Using sample data. Set <code className="bg-amber-100 px-1 rounded">AI_PROVIDER</code> and <code className="bg-amber-100 px-1 rounded">AI_API_KEY</code> in <code className="bg-amber-100 px-1 rounded">.env.local</code> for real AI analysis.
-          </div>
-        )}
 
         {/* Error Notification */}
         {error && (
@@ -100,9 +115,9 @@ const App: React.FC = () => {
               </p>
             </div>
 
-            <ImageUploader 
-              onImageSelected={handleImageSelected} 
-              isLoading={isLoading} 
+            <ImageUploader
+              onImageSelected={handleImageSelected}
+              isLoading={isLoading}
             />
 
             {/* Recent History Section */}
@@ -114,14 +129,14 @@ const App: React.FC = () => {
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                   {history.map((item) => (
-                    <button 
+                    <button
                       key={item.id}
                       onClick={() => loadHistoryItem(item)}
                       className="bg-white p-3 rounded-xl shadow-sm hover:shadow-md transition text-left flex items-center gap-3 border border-transparent hover:border-green-200 group"
                     >
-                      <img 
-                        src={item.imageUrl} 
-                        alt={item.plantName} 
+                      <img
+                        src={item.imageUrl}
+                        alt={item.plantName}
                         className="w-16 h-16 rounded-lg object-cover bg-gray-100"
                       />
                       <div className="flex-1 min-w-0">
@@ -140,9 +155,9 @@ const App: React.FC = () => {
             )}
           </div>
         ) : (
-          <AnalysisResult 
-            analysis={analysis} 
-            onReset={handleReset} 
+          <AnalysisResult
+            analysis={analysis}
+            onReset={handleReset}
             imageUrl={currentImage || ''}
           />
         )}
