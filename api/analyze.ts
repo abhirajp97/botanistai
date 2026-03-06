@@ -121,8 +121,7 @@ export default async function handler(req: any, res: any) {
           content: [
             {
               type: 'image',
-              image: cleanBase64,
-              mimeType: 'image/jpeg',
+              image: Buffer.from(cleanBase64, 'base64'),
             },
             {
               type: 'text',
