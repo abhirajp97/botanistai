@@ -13,6 +13,16 @@
 
 ---
 
+## Try It Out
+
+**→ [botanistai.vercel.app](https://botanistai.vercel.app)**
+
+No sign-up. No API key. Open it, upload a plant photo, get an AI diagnosis in ~3 seconds. Works on mobile too — take a photo directly from the camera.
+
+Want to use a different model? Hit the **⚙️ gear icon** in the header and paste in your own Gemini, Claude, or GPT-4o key.
+
+---
+
 ## The Idea
 
 Point your camera at a plant, get back: what it is, how healthy it is (scored 0–100), what's wrong, and exactly what to do about it.
