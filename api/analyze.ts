@@ -62,8 +62,10 @@ export default async function handler(req: any, res: any) {
     return;
   }
 
-  // Strip data URL prefix if present so we have raw base64
-  const cleanBase64 = image.replace(/^data:image\/\w+;base64,/, '');
+  // Ensure the image has a data URL prefix — the AI SDK uses it to detect MIME type
+  const imageDataUrl = image.startsWith('data:')
+    ? image
+    : `data:image/jpeg;base64,${image}`;
 
   try {
     let aiModel: any;
@@ -121,7 +123,7 @@ export default async function handler(req: any, res: any) {
           content: [
             {
               type: 'image',
-              image: Buffer.from(cleanBase64, 'base64'),
+              image: imageDataUrl,
             },
             {
               type: 'text',
