@@ -16,12 +16,36 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageSelected, isLoadin
     }
   };
 
-  const processFile = (file: File) => {
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      onImageSelected(reader.result as string);
-    };
-    reader.readAsDataURL(file);
+  const compressImage = (file: File): Promise<string> => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      const objectUrl = URL.createObjectURL(file);
+      img.onload = () => {
+        URL.revokeObjectURL(objectUrl);
+        const MAX_DIM = 1280;
+        let { width, height } = img;
+        if (width > MAX_DIM || height > MAX_DIM) {
+          if (width >= height) {
+            height = Math.round((height * MAX_DIM) / width);
+            width = MAX_DIM;
+          } else {
+            width = Math.round((width * MAX_DIM) / height);
+            height = MAX_DIM;
+          }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        canvas.getContext('2d')!.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', 0.85));
+      };
+      img.src = objectUrl;
+    });
+  };
+
+  const processFile = async (file: File) => {
+    const compressed = await compressImage(file);
+    onImageSelected(compressed);
   };
 
   const handleDrag = (e: React.DragEvent) => {
@@ -91,7 +115,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageSelected, isLoadin
               </button>
               
               <p className="text-xs text-gray-400 mt-2">
-                Supports JPG, PNG, WEBP (Max 5MB)
+                Supports JPG, PNG, WEBP — large photos auto-compressed
               </p>
             </div>
           </div>

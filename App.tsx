@@ -45,6 +45,9 @@ const App: React.FC = () => {
       });
 
       if (!response.ok) {
+        if (response.status === 413) {
+          throw new Error('Photo is too large for the server. Please try a lower-resolution image.');
+        }
         const errData = await response.json().catch(() => ({}));
         throw new Error(errData.error || `Server error: ${response.status}`);
       }
