@@ -1,53 +1,155 @@
-# BotanistAI 🌿
+<div align="center">
 
-AI-powered plant health diagnosis. Upload a photo of your plant to identify it, diagnose health issues, and get expert care instructions.
+# 🌿 BotanistAI
 
-**No account or API key required to try it out** — the app runs in demo mode by default.
+**Snap a photo of your plant. Get an instant AI diagnosis.**
+
+[![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
+[![Made with Vercel AI SDK](https://img.shields.io/badge/Vercel%20AI%20SDK-black.svg?logo=vercel)](#)
+
+[Live Demo](https://botanistai.vercel.app) · [Read the Story](https://half-baked.vercel.app/blog/botanistai.html) · [Half-Baked](https://github.com/abhirajp97/half-baked-website)
+
+</div>
+
+---
+
+## The Idea
+
+Point your camera at a plant, get back: what it is, how healthy it is (scored 0–100), what's wrong, and exactly what to do about it.
+
+No account. No subscription. Works out of the box with a free Groq API key as the server-side default — users can also bring their own Gemini, Claude, or GPT-4o key via the UI.
 
 ---
 
 ## Quick Start
 
-**Prerequisites:** Node.js v18+
+**Prerequisites:** Node.js 18+ and a [Groq API key](https://console.groq.com) (free)
 
 ```bash
+git clone https://github.com/abhirajp97/botanistai.git
+cd botanistai
 npm install
-npm run dev
+
+# Create .env.local with your Groq key
+echo "GROQ_API_KEY=your_key_here" > .env.local
+
+# Start Vite frontend + Vercel serverless functions together
+vercel dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) — the app loads instantly in **Demo Mode**, returning sample plant analyses so you can explore the full UI right away.
+Open [http://localhost:3000](http://localhost:3000) — upload a plant photo and get an instant analysis.
+
+> **Why `vercel dev` instead of `npm run dev`?** The app routes image analysis through a Vercel serverless function (`api/analyze.ts`). `vercel dev` runs both the Vite frontend and the API function locally. `npm run dev` runs only the frontend, so the `/api/analyze` call will fail.
 
 ---
 
-## Enable Real AI Analysis (Optional)
+## Architecture
 
-To use a real LLM for analysis, create a `.env.local` file in the project root:
+All AI calls happen server-side — no API keys are exposed to the browser.
 
-```bash
-AI_PROVIDER=openai        # openai | google | anthropic
-AI_API_KEY=your-key-here  # API key for the chosen provider
-AI_MODEL=gpt-4o           # optional — sensible defaults are used if omitted
+```
+Browser → POST /api/analyze { image, provider, apiKey? }
+                    ↓
+         api/analyze.ts (Vercel serverless function)
+                    ↓
+         Vercel AI SDK → Groq (default) / Gemini / Claude / GPT-4o
+                    ↓
+         PlantAnalysis JSON → Browser
 ```
 
-Then restart the dev server (`npm run dev`). The Demo Mode banner will disappear and all plant analyses will use your chosen model.
+The frontend sends a base64-encoded image. The server picks a provider, calls the AI, and returns a typed `PlantAnalysis` object validated by a Zod schema.
 
-### Provider Setup
+---
 
-| Provider | `AI_PROVIDER` | Get an API Key | Default Model |
-|---|---|---|---|
-| OpenAI | `openai` | [platform.openai.com](https://platform.openai.com/api-keys) | `gpt-4o` |
-| Google Gemini | `google` | [aistudio.google.com](https://aistudio.google.com/apikey) | `gemini-2.5-flash` |
-| Anthropic Claude | `anthropic` | [console.anthropic.com](https://console.anthropic.com/settings/keys) | `claude-sonnet-4-20250514` |
+## Multi-Model Support
 
-You can override the model by setting `AI_MODEL` to any vision-capable model your provider supports.
+The **⚙️ gear icon** in the header opens a model selector:
+
+| Provider | Model | Cost |
+|----------|-------|------|
+| **Groq (default)** | Llama 4 Scout | Free tier |
+| Google | Gemini 2.5 Flash | Bring your own key |
+| Anthropic | Claude Sonnet | Bring your own key |
+| OpenAI | GPT-4o | Bring your own key |
+
+For the default Groq model, only the server needs a key (`GROQ_API_KEY`). For other providers, users paste their own key in the UI — it's sent to the server per-request and never stored.
+
+---
+
+## How It Works
+
+1. **ImageUploader** captures a photo or file and converts it to a base64 data URL
+2. **App.tsx** POSTs it to `/api/analyze` with the chosen `provider` and optional `apiKey`
+3. **api/analyze.ts** selects the right provider via the Vercel AI SDK and calls `generateObject` with a Zod schema
+4. The AI returns structured JSON matching `PlantAnalysis` — plant name, health score, diagnosis, care instructions
+5. **AnalysisResult** renders the result with a recharts health gauge
+
+---
+
+## What's "Half-Baked" About It?
+
+### What works ✅
+- Plant identification (common + scientific name)
+- Health score (0–100) with visual gauge
+- Specific care instructions (not generic advice)
+- Scan history in localStorage (last 10 scans)
+- Multi-provider model switching in the UI
+
+### What's left to build 🚧
+- Cloud sync / user accounts — history is localStorage-only
+- Reminders — tells you to water in 3 days, won't remind you
+- Progress tracking — no way to compare scans over time
+- Expert verification — AI can be wrong, no confidence scoring
+
+---
+
+## Ideas for Extending This
+
+### Make it a real product
+- Add auth (Supabase, Firebase)
+- Cloud storage for scan history
+- Push notification reminders
+
+### Make it smarter
+- Fine-tune on plant disease datasets
+- Multi-image health trend tracking
+- Confidence scoring per diagnosis
+
+### Make it B2B
+- Nursery / greenhouse inventory
+- Agricultural pest detection at scale
 
 ---
 
 ## Tech Stack
 
-- React 19 + TypeScript
-- Vite
-- [Vercel AI SDK](https://ai-sdk.dev) — unified interface for OpenAI, Google, and Anthropic
-- Tailwind CSS
-- Recharts (health score visualization)
-- Lucide React (icons)
+| Tech | Why |
+|------|-----|
+| React 19 + Vite | Fast dev, lightweight bundle |
+| TypeScript | Type-safe PlantAnalysis across frontend and backend |
+| [Vercel AI SDK](https://ai-sdk.dev) | Unified interface for Groq/Gemini/Anthropic/OpenAI |
+| Zod | Schema validation for AI-generated JSON |
+| Tailwind CSS (CDN) | Quick styling, no build step |
+| Recharts | Health score radial gauge |
+| Lucide React | Icons |
+
+---
+
+## Deploying Your Own
+
+1. Fork this repo
+2. Connect to Vercel (`vercel` CLI or [vercel.com/new](https://vercel.com/new))
+3. Add `GROQ_API_KEY` to your Vercel project's Environment Variables (Project → Settings → Environment Variables)
+4. Deploy — the public demo will work immediately with Llama 4 via Groq's free tier
+
+---
+
+## License
+
+MIT — do whatever you want with it.
+
+---
+
+## Credits
+
+Built as part of [Half-Baked](https://github.com/abhirajp97/half-baked-website), a weekly series of open-source prototypes by [Abhiraj Parikh](https://github.com/abhirajp97).

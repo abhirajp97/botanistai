@@ -138,13 +138,9 @@ export default async function handler(req: any, res: any) {
     res.setHeader('Content-Type', 'application/json');
     res.end(JSON.stringify(object));
   } catch (error: any) {
-    console.error('Analysis error:', JSON.stringify(error, null, 2));
+    console.error('Analysis error:', error?.message, error?.cause);
     res.statusCode = 500;
     res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify({
-      error: error?.message ?? 'Failed to analyze image. Please try again.',
-      cause: error?.cause?.message ?? undefined,
-      details: error?.data ?? error?.responseBody ?? undefined,
-    }));
+    res.end(JSON.stringify({ error: error?.message ?? 'Failed to analyze image. Please try again.' }));
   }
 }
