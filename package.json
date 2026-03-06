@@ -13,6 +13,7 @@
     "@ai-sdk/google": "^3.0.31",
     "@ai-sdk/groq": "^3.0.29",
     "@ai-sdk/openai": "^3.0.33",
+    "@vercel/analytics": "^1.6.1",
     "ai": "^6.0.100",
     "lucide-react": "^0.561.0",
     "react": "^19.2.3",
