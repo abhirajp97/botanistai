@@ -7,7 +7,7 @@
 [![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 [![Made with Vercel AI SDK](https://img.shields.io/badge/Vercel%20AI%20SDK-black.svg?logo=vercel)](#)
 
-[Live Demo](https://botanistai.vercel.app) · [Read the Story](https://half-baked.vercel.app/blog/botanistai.html) · [Half-Baked](https://github.com/abhirajp97/half-baked-website)
+[Live Demo](https://botanistai.vercel.app) · [Read the Story](https://half-baked-website.vercel.app/blog/botanistai.html) · [Half-Baked](https://github.com/abhirajp97/half-baked-website)
 
 </div>
 
